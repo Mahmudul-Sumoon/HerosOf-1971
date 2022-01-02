@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 dotenv.config();
 
-app.get("/:name", async(req, res) => {
+app.get("/v3/:name", async(req, res) => {
     (async function scrape() {
         const browser = await puppeteer.launch({
             headless: true,
@@ -54,7 +54,32 @@ app.get("/:name", async(req, res) => {
             headLine[duplicateValueIndex] = duplicate[0] + "1";
             let tableHeader = Array.from(
                 table[2].querySelectorAll(`tbody>tr>th`)
-            ).map((e) => e.innerText);
+            ).map(function(e) {
+                let checkVal = e.innerText.toLowerCase();
+                if (checkVal == "serial no." || checkVal == "si. no.") {
+                    return "ID";
+                }
+                if (
+                    checkVal == "rank (at the time of award)" ||
+                    checkVal == "id number & rank"
+                ) {
+                    return "Rank";
+                }
+                if (checkVal == "name") {
+                    return "Name";
+                }
+                if (checkVal == "id no.") {
+                    return "ID";
+                }
+                if (checkVal != "id no.") {
+                    return "ID";
+                }
+            });
+
+            // tableHeader.map((e, i) {
+            //     if (e === 'Serial No.' || )
+            // });
+
             var allData = [];
             //var dataTemp = {};
             let allDataLength = Array.from(
